@@ -5,6 +5,7 @@ import ModeToggle from "./components/ModeToggle.jsx";
 import BotChecklist from "./components/BotChecklist.jsx";
 import CompareTable from "./components/CompareTable.jsx";
 import CompareEquityChart from "./components/CompareEquityChart.jsx";
+import RankingTable from "./components/RankingTable.jsx";
 
 export default function App() {
   const [bots, setBots] = useState([]);
@@ -93,6 +94,15 @@ export default function App() {
 
       {!loading && !error && mode === "compare" && (
         <div className="card">
+          <RankingTable
+            bots={bots}
+            onSelectBot={(slug) =>
+              setSelectedSlugs((prev) => (prev.includes(slug) ? prev : [...prev, slug]))
+            }
+          />
+          <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: "0 0 8px" }}>
+            Or pick specific strategies to compare side by side:
+          </p>
           <BotChecklist bots={bots} selectedSlugs={selectedSlugs} onToggle={toggleCompareSlug} />
           {compareBots.length === 0 && (
             <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Select at least one strategy above.</p>
