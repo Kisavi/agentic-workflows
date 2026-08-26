@@ -1,20 +1,22 @@
 import { useState, useEffect } from "react";
 import BotCard from "./components/BotCard.jsx";
+import BotSelector from "./components/BotSelector.jsx";
+import ModeToggle from "./components/ModeToggle.jsx";
+import BotChecklist from "./components/BotChecklist.jsx";
+import CompareTable from "./components/CompareTable.jsx";
+import CompareEquityChart from "./components/CompareEquityChart.jsx";
 
 export default function App() {
-  // Three pieces of state cover the three things that can happen while
-  // loading: still waiting (loading), succeeded (bots has data), or
-  // failed (error has a message). Only one is ever "active" at a time.
   const [bots, setBots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // useEffect with an empty dependency array ([]) runs its function
-  // exactly once, right after the component first renders - the
-  // standard place to kick off a data fetch. import.meta.env.BASE_URL
-  // is Vite's way of injecting the `base` path from vite.config.js, so
-  // this works both locally (base "/") and once deployed to GitHub
-  // Pages (base "/agentic-workflows/").
+  // "single" shows one bot's full card via a dropdown; "compare" shows
+  // a checklist + side-by-side table for whichever bots are checked.
+  const [mode, setMode] = useState("single");
+  const [selectedSlug, setSelectedSlug] = useState(null);
+  const [selectedSlugs, setSelectedSlugs] = useState([]);
+
   useEffect(() => {
     async function loadData() {
       try {
@@ -31,10 +33,12 @@ export default function App() {
           )
         );
 
-        // Sort by trade count, most-active first, so the strategies with
-        // real track records show up before empty/new ones.
         results.sort((a, b) => b.trades - a.trades);
         setBots(results);
+        if (results.length > 0) {
+          setSelectedSlug(results[0].id);
+          setSelectedSlugs([results[0].id, results[1]?.id].filter(Boolean));
+        }
       } catch (err) {
         setError(err.message);
       } finally {
@@ -45,14 +49,63 @@ export default function App() {
     loadData();
   }, []);
 
+  function toggleCompareSlug(slug) {
+    setSelectedSlugs((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
+    );
+  }
+
+  const selectedBot = bots.find((b) => b.id === selectedSlug);
+  const compareBots = bots.filter((b) => selectedSlugs.includes(b.id));
+
   return (
     <div className="page">
-      <p className="page-title">Agentic workflows</p>
-      <p className="page-subtitle">Live and backtested performance across all strategies</p>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-start",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 12,
+          marginBottom: "1.5rem",
+        }}
+      >
+        <div>
+          <p className="page-title">Agentic workflows</p>
+          <p className="page-subtitle" style={{ margin: 0 }}>
+            Live and backtested performance across all strategies
+          </p>
+        </div>
+        {!loading && !error && bots.length > 0 && <ModeToggle mode={mode} onChange={setMode} />}
+      </div>
 
       {loading && <p className="loading">Loading...</p>}
       {error && <p className="error">{error}</p>}
-      {!loading && !error && bots.map((bot) => <BotCard bot={bot} key={bot.id} />)}
+
+      {!loading && !error && mode === "single" && selectedBot && (
+        <>
+          <div style={{ marginBottom: "1rem" }}>
+            <BotSelector bots={bots} selectedSlug={selectedSlug} onChange={setSelectedSlug} />
+          </div>
+          <BotCard bot={selectedBot} />
+        </>
+      )}
+
+      {!loading && !error && mode === "compare" && (
+        <div className="card">
+          <BotChecklist bots={bots} selectedSlugs={selectedSlugs} onToggle={toggleCompareSlug} />
+          {compareBots.length === 0 && (
+            <p style={{ fontSize: 13, color: "var(--text-muted)" }}>Select at least one strategy above.</p>
+          )}
+          {compareBots.length > 0 && (
+            <>
+              <CompareTable bots={compareBots} />
+              <CompareEquityChart bots={compareBots} />
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 }
+
