@@ -96,9 +96,10 @@ export default function App() {
         <div className="card">
           <RankingTable
             bots={bots}
-            onSelectBot={(slug) =>
-              setSelectedSlugs((prev) => (prev.includes(slug) ? prev : [...prev, slug]))
-            }
+            onSelectBot={(slug) => {
+              setSelectedSlug(slug);
+              setMode("single");
+            }}
           />
           <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: "0 0 8px" }}>
             Or pick specific strategies to compare side by side:
