@@ -1,0 +1,174 @@
+:root {
+  --surface-page: #f5f4f0;
+  --surface-card: #ffffff;
+  --surface-tile: #f7f6f2;
+  --border: #e4e2da;
+  --text-primary: #17171a;
+  --text-secondary: #6b6a63;
+  --text-muted: #9c9a90;
+  --success-bg: #e1f5ee;
+  --success-text: #0f6e56;
+  --danger-bg: #faece7;
+  --danger-text: #993c1d;
+  --muted-bg: #f1efe8;
+  --muted-text: #5f5e5a;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--surface-page);
+  color: var(--text-primary);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+}
+
+.page {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+.page-title {
+  font-size: 22px;
+  font-weight: 500;
+  margin: 0 0 4px;
+}
+
+.page-subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 1.5rem;
+}
+
+.card {
+  background: var(--surface-card);
+  border: 0.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.badge {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 8px;
+}
+
+.badge-live {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.badge-shelved {
+  background: var(--muted-bg);
+  color: var(--muted-text);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.metric-tile {
+  background: var(--surface-tile);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.metric-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 4px;
+}
+
+.metric-value {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0;
+}
+
+.metric-value.small {
+  font-size: 14px;
+}
+
+.metric-value.positive {
+  color: var(--success-text);
+}
+
+.metric-value.negative {
+  color: var(--danger-text);
+}
+
+.chart-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+
+.chart-wrap {
+  position: relative;
+  height: 160px;
+  margin-bottom: 1.5rem;
+}
+
+.chart-wrap.performance {
+  height: 180px;
+  margin-bottom: 0;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.controls-group {
+  display: flex;
+  gap: 8px;
+}
+
+select {
+  font-size: 12px;
+  height: 28px;
+  padding: 0 8px;
+  border: 0.5px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface-card);
+  color: var(--text-primary);
+}
+
+.loading,
+.error {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.error {
+  color: var(--danger-text);
+}

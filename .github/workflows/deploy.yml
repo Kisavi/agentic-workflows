@@ -1,0 +1,85 @@
+name: Build and deploy dashboard
+
+# Two ways this fires:
+#  - push: normal - whenever app source code changes on main
+#  - repository_dispatch: triggered remotely by telemetry-store's own
+#    workflow the moment any bot publishes new data, so the dashboard
+#    stays close to real-time without polling on a schedule
+on:
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [data-updated]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout this repo
+        uses: actions/checkout@v4
+
+      # The private data repo is checked out into a separate folder using
+      # a token scoped ONLY to that repo (PUBLISH_TOKEN, stored as a
+      # secret here). This checkout happens on the Actions runner - it's
+      # never committed to this repo's git history, and visitors to the
+      # deployed site never see telemetry-store directly; they only ever
+      # get the plain JSON files that end up copied into dist/ below.
+      - name: Checkout private data repo
+        uses: actions/checkout@v4
+        with:
+          repository: Kisavi/telemetry-store
+          token: ${{ secrets.PUBLISH_TOKEN }}
+          path: telemetry-store-data
+
+      - name: Copy data into the build and generate a manifest
+        run: |
+          mkdir -p public/data
+          cp telemetry-store-data/agents/*.json public/data/
+          # manifest.json lists which slugs exist, generated fresh each
+          # build - so adding a 9th bot later needs no app code change,
+          # just a rebuild (which happens automatically anyway).
+          cd public/data
+          ls *.json | sed 's/\.json$//' | python3 -c "
+          import json, sys
+          slugs = [l.strip() for l in sys.stdin if l.strip()]
+          json.dump(slugs, open('manifest.json', 'w'))
+          "
+          cd ../..
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
