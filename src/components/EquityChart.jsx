@@ -36,6 +36,9 @@ export default function EquityChart({ tradeHistory }) {
         fill: true,
         tension: 0.3,
         pointRadius: 0,
+        pointHoverRadius: 5,
+        pointHoverBackgroundColor: "#199e70",
+        pointHitRadius: 12,
         borderWidth: 2,
       },
     ],
@@ -44,7 +47,24 @@ export default function EquityChart({ tradeHistory }) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
-    plugins: { legend: { display: false } },
+    // "index" + intersect:false means hovering ANYWHERE along the
+    // x-axis near a point triggers its tooltip - without this, a
+    // reader would have to land a pixel-perfect hover on an invisible
+    // point (pointRadius: 0) to see anything at all.
+    interaction: { mode: "index", intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          title: (items) => {
+            const i = items[0].dataIndex;
+            const t = tradeHistory[i];
+            return t.date ? `Trade #${i + 1} - ${t.date}` : `Trade #${i + 1}`;
+          },
+          label: (item) => `Equity: $${item.parsed.y.toLocaleString()}`,
+        },
+      },
+    },
     scales: {
       x: { display: false },
       y: {

@@ -30,6 +30,8 @@ export default function CompareEquityChart({ bots }) {
     backgroundColor: "transparent",
     tension: 0.3,
     pointRadius: 0,
+    pointHoverRadius: 5,
+    pointHitRadius: 12,
     borderWidth: 2,
   }));
 
@@ -41,10 +43,16 @@ export default function CompareEquityChart({ bots }) {
   const options = {
     responsive: true,
     maintainAspectRatio: false,
+    interaction: { mode: "index", intersect: false },
     plugins: {
       legend: {
         position: "top",
         labels: { boxWidth: 10, boxHeight: 10, font: { size: 12 } },
+      },
+      tooltip: {
+        callbacks: {
+          label: (item) => `${item.dataset.label}: $${item.parsed.y.toLocaleString()}`,
+        },
       },
     },
     scales: {
